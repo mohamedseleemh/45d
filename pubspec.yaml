@@ -71,6 +71,17 @@ dev_dependencies:
   # Code generation
   build_runner: ^2.4.13
   json_serializable: ^6.8.0
+  
+  # Testing dependencies
+  mockito: ^5.4.4
+  integration_test:
+    sdk: flutter
+  
+  # Security and encryption
+  crypto: ^3.0.5
+  
+  # Performance monitoring
+  flutter_performance_monitor: ^1.0.0
 
 flutter:
   uses-material-design: true # CRITICAL: Required for Material icon font - DO NOT REMOVE

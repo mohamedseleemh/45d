@@ -1,6 +1,19 @@
 # Flutter
 
-A modern Flutter-based mobile application utilizing the latest mobile development technologies and tools for building responsive cross-platform applications.
+# لقاء شات - تطبيق المحادثات الصوتية والمرئية
+
+تطبيق Flutter متقدم للمحادثات الصوتية والمرئية باللغة العربية، مبني بأحدث التقنيات والأدوات لتوفير تجربة تواصل سلسة وآمنة.
+
+## ✨ الميزات الرئيسية
+
+- 🎤 **مكالمات صوتية عالية الجودة** - تقنية WebRTC للاتصال المباشر
+- 📹 **مكالمات فيديو HD** - جودة عالية مع تحكم كامل
+- 💬 **محادثة نصية فورية** - رسائل فورية مع دعم العربية
+- 🏠 **غرف متنوعة** - إنشاء غرف عامة وخاصة وبدعوة
+- 🔒 **أمان متقدم** - تشفير البيانات وحماية الخصوصية
+- 🌙 **وضع مظلم** - واجهة مريحة للعينين
+- 🔔 **إشعارات ذكية** - تنبيهات مخصصة ومرنة
+- 📱 **تصميم متجاوب** - يعمل على جميع أحجام الشاشات
 
 ## 📋 Prerequisites
 
@@ -8,12 +21,20 @@ A modern Flutter-based mobile application utilizing the latest mobile developmen
 - Dart SDK
 - Android Studio / VS Code with Flutter extensions
 - Android SDK / Xcode (for iOS development)
+- حساب Supabase نشط
+- اتصال إنترنت مستقر
 
 ## 🛠️ Installation
 
 1. Install dependencies:
 ```bash
 flutter pub get
+```
+
+2. إعداد متغيرات البيئة:
+```bash
+cp env.json.example env.json
+# قم بتحديث القيم في env.json بمفاتيح Supabase الخاصة بك
 ```
 
 2. Run the application:
@@ -51,6 +72,24 @@ To run the app with environment variables defined in an env.json file, follow th
     --dart-define-from-file=env.json
     ```
 
+## 🏗️ Architecture
+
+يتبع التطبيق معمارية Clean Architecture مع فصل واضح للطبقات:
+
+```
+├── Presentation Layer (UI)
+├── Domain Layer (Business Logic)
+├── Data Layer (Repositories & Data Sources)
+└── Core Layer (Utilities & Services)
+```
+
+### طبقات التطبيق:
+
+1. **Core Layer** - الخدمات الأساسية والأدوات
+2. **Data Layer** - مستودعات البيانات والمصادر
+3. **Domain Layer** - منطق الأعمال والنماذج
+4. **Presentation Layer** - واجهة المستخدم والتفاعل
+
 ## 📁 Project Structure
 
 ```
@@ -58,15 +97,35 @@ flutter_app/
 ├── android/            # Android-specific configuration
 ├── ios/                # iOS-specific configuration
 ├── lib/
-│   ├── core/           # Core utilities and services
-│   │   └── utils/      # Utility classes
-│   ├── presentation/   # UI screens and widgets
-│   │   └── splash_screen/ # Splash screen implementation
-│   ├── routes/         # Application routing
-│   ├── theme/          # Theme configuration
-│   ├── widgets/        # Reusable UI components
-│   └── main.dart       # Application entry point
+│   ├── core/                    # الوظائف الأساسية
+│   │   ├── config/             # تكوين التطبيق
+│   │   ├── constants/          # الثوابت
+│   │   ├── exceptions/         # الاستثناءات المخصصة
+│   │   ├── providers/          # موفري الحالة
+│   │   ├── services/           # الخدمات الأساسية
+│   │   └── utils/              # الأدوات المساعدة
+│   ├── features/               # الميزات الرئيسية
+│   │   ├── auth/              # المصادقة
+│   │   ├── rooms/             # إدارة الغرف
+│   │   ├── chat/              # المحادثة
+│   │   └── profile/           # الملف الشخصي
+│   ├── shared/                 # المكونات المشتركة
+│   │   ├── models/            # النماذج
+│   │   ├── widgets/           # الويدجت المشتركة
+│   │   └── themes/            # الثيمات
+│   ├── presentation/           # شاشات التطبيق
+│   │   ├── auth/              # شاشات المصادقة
+│   │   ├── room_list/         # قائمة الغرف
+│   │   ├── room_interface/    # واجهة الغرفة
+│   │   ├── create_room/       # إنشاء غرفة
+│   │   ├── room_settings/     # إعدادات الغرفة
+│   │   └── splash_screen/     # شاشة البداية
+│   ├── widgets/               # الويدجت العامة
+│   └── main.dart              # نقطة دخول التطبيق
 ├── assets/             # Static assets (images, fonts, etc.)
+├── test/               # الاختبارات
+├── docs/               # التوثيق
+├── supabase/           # إعدادات قاعدة البيانات
 ├── pubspec.yaml        # Project dependencies and configuration
 └── README.md           # Project documentation
 ```
@@ -91,6 +150,21 @@ class AppRoutes {
 }
 ```
 
+## 🧪 Testing
+
+### تشغيل الاختبارات:
+
+```bash
+# اختبارات الوحدة
+flutter test test/unit_test.dart
+
+# اختبارات الويدجت
+flutter test test/widget_test.dart
+
+# اختبارات التكامل
+flutter test integration_test/
+```
+
 ## 🎨 Theming
 
 This project includes a comprehensive theming system with both light and dark themes:
@@ -101,6 +175,12 @@ ThemeData theme = Theme.of(context);
 
 // Use theme colors
 Color primaryColor = theme.colorScheme.primary;
+
+// تبديل الثيم
+Provider.of<EnhancedAppStateProvider>(context, listen: false).toggleTheme();
+
+// الحصول على الثيم الحالي
+bool isDarkMode = Provider.of<EnhancedAppStateProvider>(context).isDarkMode;
 ```
 
 The theme configuration includes:
@@ -124,6 +204,42 @@ Container(
 ```
 ## 📦 Deployment
 
+### Android
+```bash
+# بناء APK للإنتاج
+flutter build apk --release --dart-define-from-file=env.json
+
+# بناء App Bundle
+flutter build appbundle --release --dart-define-from-file=env.json
+```
+
+### iOS
+```bash
+# بناء للإنتاج
+flutter build ios --release --dart-define-from-file=env.json
+```
+
+## 🔧 Configuration
+
+### متغيرات البيئة المطلوبة:
+
+```json
+{
+  "SUPABASE_URL": "https://your-project.supabase.co",
+  "SUPABASE_ANON_KEY": "your-anon-key",
+  "OPENAI_API_KEY": "your-openai-key",
+  "GEMINI_API_KEY": "your-gemini-key",
+  "ANTHROPIC_API_KEY": "your-anthropic-key",
+  "PERPLEXITY_API_KEY": "your-perplexity-key"
+}
+```
+
+## 📚 Documentation
+
+- [دليل التطوير](docs/DEVELOPMENT_GUIDE.md)
+- [توثيق API](docs/API_DOCUMENTATION.md)
+- [دليل النشر](docs/DEPLOYMENT_GUIDE.md)
+
 Build the application for production:
 
 ```bash
@@ -133,6 +249,25 @@ flutter build apk --release
 # For iOS
 flutter build ios --release
 ```
+
+## 🤝 Contributing
+
+نرحب بالمساهمات! يرجى قراءة [دليل المساهمة](CONTRIBUTING.md) قبل البدء.
+
+### خطوات المساهمة:
+1. Fork المشروع
+2. إنشاء branch للميزة الجديدة
+3. كتابة الكود مع الاختبارات
+4. تشغيل جميع الاختبارات
+5. إرسال Pull Request
+
+## 📄 License
+
+هذا المشروع مرخص تحت رخصة MIT - راجع ملف [LICENSE](LICENSE) للتفاصيل.
+
+## 🆘 Support
+
+للحصول على الدعم، يرجى فتح issue في GitHub أو التواصل عبر البريد الإلكتروني.
 
 ## 🙏 Acknowledgments
 - Built with [Rocket.new](https://rocket.new)
