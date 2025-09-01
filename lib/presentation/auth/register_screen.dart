@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../core/app_export.dart';
-import '../../core/providers/app_state_provider.dart';
+import '../../core/providers/enhanced_app_state_provider.dart';
 import '../../widgets/custom_button_widget.dart';
 import '../../widgets/custom_text_field_widget.dart';
 import '../../widgets/custom_snackbar_widget.dart';
@@ -39,14 +39,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Future<void> _signUp() async {
     if (!_formKey.currentState!.validate()) return;
     if (!_acceptTerms) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'يجب الموافقة على الشروط والأحكام',
-            textAlign: TextAlign.right,
-          ),
-          backgroundColor: AppTheme.errorLight,
-        ),
+      CustomSnackBarWidget.show(
+        context: context,
+        message: 'يجب الموافقة على الشروط والأحكام',
+        type: SnackBarType.warning,
       );
       return;
     }
@@ -56,7 +52,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
 
     try {
-      await Provider.of<AppStateProvider>(context, listen: false).signUp(
+      await Provider.of<EnhancedAppStateProvider>(context, listen: false).signUp(
         email: _emailController.text.trim(),
         password: _passwordController.text,
         fullName: _fullNameController.text.trim(),

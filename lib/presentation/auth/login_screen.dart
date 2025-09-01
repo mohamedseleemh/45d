@@ -3,7 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../core/app_export.dart';
-import '../../core/providers/app_state_provider.dart';
+import '../../core/providers/enhanced_app_state_provider.dart';
 import '../../widgets/custom_button_widget.dart';
 import '../../widgets/custom_text_field_widget.dart';
 import '../../widgets/custom_snackbar_widget.dart';
@@ -39,20 +39,20 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      await Provider.of<AppStateProvider>(context, listen: false).signIn(
+      await Provider.of<EnhancedAppStateProvider>(context, listen: false).signIn(
         _emailController.text.trim(),
         _passwordController.text,
       );
+      
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, AppRoutes.roomList);
+      }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'فشل تسجيل الدخول: ${e.toString()}',
-              textAlign: TextAlign.right,
-            ),
-            backgroundColor: AppTheme.errorLight,
-          ),
+        CustomSnackBarWidget.show(
+          context: context,
+          message: 'فشل تسجيل الدخول: ${e.toString()}',
+          type: SnackBarType.error,
         );
       }
     } finally {
@@ -64,9 +64,6 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-      if (mounted) {
-        Navigator.pushReplacementNamed(context, '/room-list');
-      }
   @override
   Widget build(BuildContext context) {
     return Directionality(
@@ -234,28 +231,19 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: Text(
                           'إنشاء حساب جديد',
                           style: TextStyle(
-                    iconName: 'person_outline',
-                    isFullWidth: true,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        CustomIconWidget(
-                          iconName: 'person_outline',
-                          color: AppTheme.lightTheme.primaryColor,
-                          size: 5.w,
-                        ),
-                        SizedBox(width: 2.w),
-                        Text(
-                          'دخول كضيف',
-                          style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
                             color: AppTheme.lightTheme.primaryColor,
+                            fontWeight: FontWeight.w600,
                           ),
-        CustomSnackBarWidget.show(
-          context: context,
-          message: 'فشل تسجيل الدخول: ${e.toString()}',
-          type: SnackBarType.error,
-        ),
-      ),
-    );
-  }
-}
+                         ),
+                       ),
+                     ],
+                   ),
+                 ],
+               ),
+             ),
+           ),
+         ),
+       ),
+     );
+   }
+ }
