@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../core/app_export.dart';
-import '../../core/services/supabase_service.dart';
+import '../../core/providers/app_state_provider.dart';
+import '../../widgets/custom_button_widget.dart';
+import '../../widgets/custom_text_field_widget.dart';
+import '../../widgets/custom_snackbar_widget.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({Key? key}) : super(key: key);
@@ -52,38 +56,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
 
     try {
-      final response = await SupabaseService.instance.signUp(
+      await Provider.of<AppStateProvider>(context, listen: false).signUp(
         email: _emailController.text.trim(),
         password: _passwordController.text,
-        data: {
-          'full_name': _fullNameController.text.trim(),
-        },
+        fullName: _fullNameController.text.trim(),
       );
 
-      if (response.user != null) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'تم إنشاء الحساب بنجاح! مرحباً بك في لقاء شات',
-                textAlign: TextAlign.right,
-              ),
-              backgroundColor: AppTheme.lightTheme.primaryColor,
-            ),
-          );
-          Navigator.pushReplacementNamed(context, '/room-list');
-        }
+      if (mounted) {
+        CustomSnackBarWidget.show(
+          context: context,
+          message: 'تم إنشاء الحساب بنجاح! مرحباً بك في لقاء شات',
+          type: SnackBarType.success,
+        );
+        Navigator.pushReplacementNamed(context, AppRoutes.roomList);
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'فشل إنشاء الحساب: ${e.toString()}',
-              textAlign: TextAlign.right,
-            ),
-            backgroundColor: AppTheme.errorLight,
-          ),
+        CustomSnackBarWidget.show(
+          context: context,
+          message: 'فشل إنشاء الحساب: ${e.toString()}',
+          type: SnackBarType.error,
         );
       }
     } finally {
@@ -137,138 +129,48 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   SizedBox(height: 4.h),
                   
                   // Full Name Field
-                  TextFormField(
+                  CustomTextFieldWidget(
                     controller: _fullNameController,
-                    textAlign: TextAlign.right,
-                    decoration: InputDecoration(
-                      labelText: 'الاسم الكامل',
-                      hintText: 'أدخل اسمك الكامل',
-                      prefixIcon: Padding(
-                        padding: EdgeInsets.all(3.w),
-                        child: CustomIconWidget(
-                          iconName: 'person',
-                          color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-                          size: 5.w,
-                        ),
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'الاسم الكامل مطلوب';
-                      }
-                      if (value.trim().length < 2) {
-                        return 'الاسم يجب أن يكون حرفين على الأقل';
-                      }
-                      return null;
-                    },
+                    labelText: 'الاسم الكامل',
+                    hintText: 'أدخل اسمك الكامل',
+                    prefixIconName: 'person',
+                    isRequired: true,
                   ),
                   
                   SizedBox(height: 3.h),
                   
                   // Email Field
-                  TextFormField(
+                  CustomTextFieldWidget(
                     controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    textAlign: TextAlign.right,
-                    decoration: InputDecoration(
-                      labelText: 'البريد الإلكتروني',
-                      hintText: 'أدخل بريدك الإلكتروني',
-                      prefixIcon: Padding(
-                        padding: EdgeInsets.all(3.w),
-                        child: CustomIconWidget(
-                          iconName: 'email',
-                          color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-                          size: 5.w,
-                        ),
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'البريد الإلكتروني مطلوب';
-                      }
-                      if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                        return 'البريد الإلكتروني غير صحيح';
-                      }
-                      return null;
-                    },
+                    labelText: 'البريد الإلكتروني',
+                    hintText: 'أدخل بريدك الإلكتروني',
+                    type: TextFieldType.email,
+                    prefixIconName: 'email',
+                    isRequired: true,
                   ),
                   
                   SizedBox(height: 3.h),
                   
                   // Password Field
-                  TextFormField(
+                  CustomTextFieldWidget(
                     controller: _passwordController,
-                    obscureText: _obscurePassword,
-                    textAlign: TextAlign.right,
-                    decoration: InputDecoration(
-                      labelText: 'كلمة المرور',
-                      hintText: 'أدخل كلمة مرور قوية',
-                      prefixIcon: Padding(
-                        padding: EdgeInsets.all(3.w),
-                        child: CustomIconWidget(
-                          iconName: 'lock',
-                          color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-                          size: 5.w,
-                        ),
-                      ),
-                      suffixIcon: IconButton(
-                        onPressed: () {
-                          setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
-                        },
-                        icon: CustomIconWidget(
-                          iconName: _obscurePassword ? 'visibility' : 'visibility_off',
-                          color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-                          size: 5.w,
-                        ),
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'كلمة المرور مطلوبة';
-                      }
-                      if (value.length < 8) {
-                        return 'كلمة المرور يجب أن تكون 8 أحرف على الأقل';
-                      }
-                      if (!RegExp(r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)').hasMatch(value)) {
-                        return 'كلمة المرور يجب أن تحتوي على حروف كبيرة وصغيرة وأرقام';
-                      }
-                      return null;
-                    },
+                    labelText: 'كلمة المرور',
+                    hintText: 'أدخل كلمة مرور قوية',
+                    type: TextFieldType.password,
+                    prefixIconName: 'lock',
+                    isRequired: true,
                   ),
                   
                   SizedBox(height: 3.h),
                   
                   // Confirm Password Field
-                  TextFormField(
+                  CustomTextFieldWidget(
                     controller: _confirmPasswordController,
-                    obscureText: _obscureConfirmPassword,
-                    textAlign: TextAlign.right,
-                    decoration: InputDecoration(
-                      labelText: 'تأكيد كلمة المرور',
-                      hintText: 'أعد إدخال كلمة المرور',
-                      prefixIcon: Padding(
-                        padding: EdgeInsets.all(3.w),
-                        child: CustomIconWidget(
-                          iconName: 'lock_outline',
-                          color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-                          size: 5.w,
-                        ),
-                      ),
-                      suffixIcon: IconButton(
-                        onPressed: () {
-                          setState(() {
-                            _obscureConfirmPassword = !_obscureConfirmPassword;
-                          });
-                        },
-                        icon: CustomIconWidget(
-                          iconName: _obscureConfirmPassword ? 'visibility' : 'visibility_off',
-                          color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-                          size: 5.w,
-                        ),
-                      ),
-                    ),
+                    labelText: 'تأكيد كلمة المرور',
+                    hintText: 'أعد إدخال كلمة المرور',
+                    type: TextFieldType.password,
+                    prefixIconName: 'lock_outline',
+                    isRequired: true,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'تأكيد كلمة المرور مطلوب';
@@ -332,40 +234,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   SizedBox(height: 4.h),
                   
                   // Sign Up Button
-                  SizedBox(
-                    width: double.infinity,
-                    height: 6.h,
-                    child: ElevatedButton(
-                      onPressed: _isLoading ? null : _signUp,
-                      child: _isLoading
-                          ? Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                SizedBox(
-                                  width: 5.w,
-                                  height: 5.w,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                  ),
-                                ),
-                                SizedBox(width: 3.w),
-                                Text(
-                                  'جاري إنشاء الحساب...',
-                                  style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ],
-                            )
-                          : Text(
-                              'إنشاء الحساب',
-                              style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                    ),
+                  CustomButtonWidget(
+                    text: 'إنشاء الحساب',
+                    onPressed: _signUp,
+                    isLoading: _isLoading,
+                    isFullWidth: true,
+                    iconName: 'person_add',
                   ),
                   
                   SizedBox(height: 3.h),

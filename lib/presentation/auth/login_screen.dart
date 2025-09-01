@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:sizer/sizer.dart';
 
 import '../../core/app_export.dart';
-import '../../core/services/supabase_service.dart';
+import '../../core/providers/app_state_provider.dart';
+import '../../widgets/custom_button_widget.dart';
+import '../../widgets/custom_text_field_widget.dart';
+import '../../widgets/custom_snackbar_widget.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -35,16 +39,10 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      final response = await SupabaseService.instance.signIn(
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
+      await Provider.of<AppStateProvider>(context, listen: false).signIn(
+        _emailController.text.trim(),
+        _passwordController.text,
       );
-
-      if (response.user != null) {
-        if (mounted) {
-          Navigator.pushReplacementNamed(context, '/room-list');
-        }
-      }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -66,6 +64,9 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+      if (mounted) {
+        Navigator.pushReplacementNamed(context, '/room-list');
+      }
   @override
   Widget build(BuildContext context) {
     return Directionality(
@@ -148,73 +149,25 @@ class _LoginScreenState extends State<LoginScreen> {
                   SizedBox(height: 4.h),
                   
                   // Email Field
-                  TextFormField(
+                  CustomTextFieldWidget(
                     controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    textAlign: TextAlign.right,
-                    decoration: InputDecoration(
-                      labelText: 'البريد الإلكتروني',
-                      hintText: 'أدخل بريدك الإلكتروني',
-                      prefixIcon: Padding(
-                        padding: EdgeInsets.all(3.w),
-                        child: CustomIconWidget(
-                          iconName: 'email',
-                          color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-                          size: 5.w,
-                        ),
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.trim().isEmpty) {
-                        return 'البريد الإلكتروني مطلوب';
-                      }
-                      if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                        return 'البريد الإلكتروني غير صحيح';
-                      }
-                      return null;
-                    },
+                    labelText: 'البريد الإلكتروني',
+                    hintText: 'أدخل بريدك الإلكتروني',
+                    type: TextFieldType.email,
+                    prefixIconName: 'email',
+                    isRequired: true,
                   ),
                   
                   SizedBox(height: 3.h),
                   
                   // Password Field
-                  TextFormField(
+                  CustomTextFieldWidget(
                     controller: _passwordController,
-                    obscureText: _obscurePassword,
-                    textAlign: TextAlign.right,
-                    decoration: InputDecoration(
-                      labelText: 'كلمة المرور',
-                      hintText: 'أدخل كلمة المرور',
-                      prefixIcon: Padding(
-                        padding: EdgeInsets.all(3.w),
-                        child: CustomIconWidget(
-                          iconName: 'lock',
-                          color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-                          size: 5.w,
-                        ),
-                      ),
-                      suffixIcon: IconButton(
-                        onPressed: () {
-                          setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
-                        },
-                        icon: CustomIconWidget(
-                          iconName: _obscurePassword ? 'visibility' : 'visibility_off',
-                          color: AppTheme.lightTheme.colorScheme.onSurfaceVariant,
-                          size: 5.w,
-                        ),
-                      ),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'كلمة المرور مطلوبة';
-                      }
-                      if (value.length < 6) {
-                        return 'كلمة المرور يجب أن تكون 6 أحرف على الأقل';
-                      }
-                      return null;
-                    },
+                    labelText: 'كلمة المرور',
+                    hintText: 'أدخل كلمة المرور',
+                    type: TextFieldType.password,
+                    prefixIconName: 'lock',
+                    isRequired: true,
                   ),
                   
                   SizedBox(height: 2.h),
@@ -241,7 +194,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       TextButton(
                         onPressed: () {
-                          Navigator.pushNamed(context, '/forgot-password');
+                          Navigator.pushNamed(context, AppRoutes.forgotPassword);
                         },
                         child: Text(
                           'نسيت كلمة المرور؟',
@@ -256,40 +209,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   SizedBox(height: 4.h),
                   
                   // Sign In Button
-                  SizedBox(
-                    width: double.infinity,
-                    height: 6.h,
-                    child: ElevatedButton(
-                      onPressed: _isLoading ? null : _signIn,
-                      child: _isLoading
-                          ? Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                SizedBox(
-                                  width: 5.w,
-                                  height: 5.w,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                  ),
-                                ),
-                                SizedBox(width: 3.w),
-                                Text(
-                                  'جاري تسجيل الدخول...',
-                                  style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ],
-                            )
-                          : Text(
-                              'تسجيل الدخول',
-                              style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                    ),
+                  CustomButtonWidget(
+                    text: 'تسجيل الدخول',
+                    onPressed: _signIn,
+                    isLoading: _isLoading,
+                    isFullWidth: true,
+                    iconName: 'login',
                   ),
                   
                   SizedBox(height: 3.h),
@@ -304,29 +229,13 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       TextButton(
                         onPressed: () {
-                          Navigator.pushNamed(context, '/register');
+                          Navigator.pushNamed(context, AppRoutes.register);
                         },
                         child: Text(
                           'إنشاء حساب جديد',
                           style: TextStyle(
-                            color: AppTheme.lightTheme.primaryColor,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  
-                  SizedBox(height: 4.h),
-                  
-                  // Guest Access
-                  OutlinedButton(
-                    onPressed: () {
-                      Navigator.pushReplacementNamed(context, '/room-list');
-                    },
-                    style: OutlinedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
-                    ),
+                    iconName: 'person_outline',
+                    isFullWidth: true,
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -341,14 +250,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           style: AppTheme.lightTheme.textTheme.titleMedium?.copyWith(
                             color: AppTheme.lightTheme.primaryColor,
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+        CustomSnackBarWidget.show(
+          context: context,
+          message: 'فشل تسجيل الدخول: ${e.toString()}',
+          type: SnackBarType.error,
         ),
       ),
     );

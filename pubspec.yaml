@@ -40,12 +40,37 @@ dependencies:
   # Additional utilities
   uuid: ^4.5.1
   intl: ^0.19.0
+  
+  # State Management
+  provider: ^6.1.2
+  
+  # Audio/Video Processing
+  audioplayers: ^6.1.0
+  video_player: ^2.9.2
+  
+  # Notifications
+  flutter_local_notifications: ^18.0.1
+  
+  # File handling
+  file_picker: ^8.1.4
+  mime: ^2.0.0
+  
+  # Network and HTTP
+  http: ^1.2.2
+  
+  # Utilities
+  equatable: ^2.0.7
+  json_annotation: ^4.9.0
 
   universal_html: ^2.2.4
 dev_dependencies:
   flutter_test:    # CRITICAL: Required for Flutter project testing - DO NOT REMOVE
     sdk: flutter   # CRITICAL: Required for Flutter project testing - DO NOT REMOVE
   flutter_lints: ^5.0.0 # CRITICAL: Required for code quality - DO NOT REMOVE
+  
+  # Code generation
+  build_runner: ^2.4.13
+  json_serializable: ^6.8.0
 
 flutter:
   uses-material-design: true # CRITICAL: Required for Material icon font - DO NOT REMOVE
