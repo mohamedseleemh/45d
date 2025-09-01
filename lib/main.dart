@@ -1,12 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:sizer/sizer.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../core/app_export.dart';
+import '../core/services/supabase_service.dart';
+import '../core/services/webrtc_service.dart';
 import '../widgets/custom_error_widget.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
+  // Initialize Supabase
+  try {
+    await SupabaseService.instance.initialize();
+  } catch (e) {
+    print('Failed to initialize Supabase: $e');
+  }
+  
+  // Initialize WebRTC
+  try {
+    await WebRTCService.instance.initialize();
+  } catch (e) {
+    print('Failed to initialize WebRTC: $e');
+  }
 
   bool _hasShownError = false;
 

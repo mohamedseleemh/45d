@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:sizer/sizer.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../core/app_export.dart';
+import '../../core/services/supabase_service.dart';
+import '../../core/services/webrtc_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -60,25 +63,27 @@ class _SplashScreenState extends State<SplashScreen>
 
   Future<void> _initializeApp() async {
     try {
-      // Simulate WebRTC initialization
+      // Initialize WebRTC
       setState(() {
         _initializationStatus = 'تهيئة خدمات الصوت والفيديو...';
       });
-      await Future.delayed(const Duration(milliseconds: 800));
+      await WebRTCService.instance.initialize();
 
-      // Simulate authentication check
+      // Check authentication status
       setState(() {
         _initializationStatus = 'فحص حالة المصادقة...';
       });
-      await Future.delayed(const Duration(milliseconds: 600));
+      await Future.delayed(const Duration(milliseconds: 500));
+      
+      final user = SupabaseService.instance.currentUser;
 
-      // Simulate permission setup
+      // Setup permissions
       setState(() {
         _initializationStatus = 'إعداد الأذونات...';
       });
-      await Future.delayed(const Duration(milliseconds: 700));
+      await Future.delayed(const Duration(milliseconds: 500));
 
-      // Simulate cached data loading
+      // Load cached data
       setState(() {
         _initializationStatus = 'تحميل البيانات المحفوظة...';
       });
@@ -88,10 +93,14 @@ class _SplashScreenState extends State<SplashScreen>
         _isInitializing = false;
       });
 
-      // Navigate to room list after initialization
+      // Navigate based on authentication status
       await Future.delayed(const Duration(milliseconds: 500));
       if (mounted) {
-        Navigator.pushReplacementNamed(context, '/room-list');
+        if (user != null) {
+          Navigator.pushReplacementNamed(context, '/room-list');
+        } else {
+          Navigator.pushReplacementNamed(context, '/login');
+        }
       }
     } catch (e) {
       setState(() {
